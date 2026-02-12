@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# RetirePlan - AI Retirement Portfolio Simulator 🚀
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**RetirePlan** is an intelligent web application designed to help users plan their retirement by simulating asset growth and recommending optimal ETF portfolios. Built with React and TypeScript, it focuses on the Korean market ecosystem (TIGER, KODEX, ACE ETFs).
 
-Currently, two official plugins are available:
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Vite](https://img.shields.io/badge/Vite-6.0-purple)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Key Features
 
-## React Compiler
+### 1. 📊 Retirement Simulation
+- Calculate expected retirement savings based on current age, salary, and monthly contribution.
+- visualize the growth of assets over time with compound interest.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. 🤖 AI Portfolio Recommendation
+- Analyze user's risk tolerance (MDD) and target return.
+- Recommend proven asset allocation strategies (e.g., *60/40 Rule*, *All Weather*, *Warren Buffett 90/10*).
+- **NEW**: **Dynamic AI Strategy** - Automatically generates high-growth custom portfolios (NASDAQ/S&P Mix) for users targeting returns > 10%.
 
-## Expanding the ESLint configuration
+### 3. 🇰🇷 Korean Market Optimized
+- Uses actual ETFs listed on the Korea Exchange (KRX).
+- Supports major brands: TIGER, KODEX, ACE, KBSTAR.
+- Backtested against 20-year historical data for accuracy.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 4. ⚡ Modern Tech Stack & SEO
+- **Frontend**: React 19, Vite, TypeScript
+- **Styling**: Tailwind CSS, shadcn/ui
+- **State Management**: Zustand
+- **SEO**: Dynamic Meta Tags, Sitemap, Robots.txt
+- **Monetization**: Google AdSense Integration
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 🛠️ Tech Stack
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS](https://tailwindcss.com/)
+- **Icons**: [Lucide React](https://lucide.dev/)
+- **Routing**: [React Router v6](https://reactrouter.com/)
+- **Charts**: [Recharts](https://recharts.org/) (Planned)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/arslonga1984/retireplan-mvp.git
+   cd retireplan-mvp/retireplan-app
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Build for production**
+   ```bash
+   npm run build
+   ```
+
+## 📂 Project Structure
+
+```
+src/
+├── components/
+│   ├── InputForm/       # Step-by-step user input forms
+│   ├── Layout/          # Header, Footer, ProgressBar
+│   ├── Results/         # Dashboard, Charts
+│   ├── SEO/             # MetaHead, AdPlaceholder
+│   └── ui/              # shadcn/ui components
+├── lib/
+│   ├── strategies/      # Portfolio presets & Recommendation logic
+│   ├── store.ts         # Zustand state store
+│   └── utils.ts         # Helper functions
+├── types/               # TypeScript interfaces
+└── App.tsx              # Main application entry
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📝 License
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+This project is licensed under the MIT License.
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+*Developed by [arslonga1984](https://github.com/arslonga1984)*
