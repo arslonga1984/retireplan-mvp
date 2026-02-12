@@ -57,6 +57,10 @@ export function getRecommendedStrategy(targetReturn: number, maxDrawdown: number
 }
 
 export function getRecommendationReason(strategy: PortfolioStrategy, targetReturn: number, maxDrawdown: number): string {
+    if (targetReturn > 10.0) {
+        return "현재 안전한 ETF 포트폴리오로 연 10% 이상을 꾸준히 달성하는 것은 매우 어렵습니다. 대신, 허용하신 위험 범위 내에서 가장 높은 수익을 기대할 수 있는 전략(약 10%)을 제안합니다.";
+    }
+
     const returnDiff = strategy.expectedReturn - targetReturn;
     const mddDiff = maxDrawdown - strategy.expectedMDD;
 
