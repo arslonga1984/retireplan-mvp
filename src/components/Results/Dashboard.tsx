@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/lib/store';
 import { STRATEGIES } from '@/lib/strategies/presets';
+import { getRecommendedStrategy } from '@/lib/strategies/recommender';
 import { runSimulation } from '@/lib/calculations/simulator';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
@@ -17,7 +18,20 @@ export default function Dashboard() {
     const { inputs, reset } = useAppStore();
 
     // 전략 찾기
-    const strategy = STRATEGIES.find(s => s.id === inputs.strategyId) || STRATEGIES[0];
+    let strategy = STRATEGIES.find(s => s.id === inputs.strategyId);
+
+    // 만약 custom_ai_growth 라면, 동적으로 다시 생성
+    if (!strategy && inputs.strategyId === 'custom_ai_growth') {
+        const { recommended } = getRecommendedStrategy(inputs.targetReturn, inputs.maxDrawdown);
+        if (recommended.id === 'custom_ai_growth') {
+            strategy = recommended;
+        }
+    }
+
+    // Fallback
+    if (!strategy) {
+        strategy = STRATEGIES[0];
+    }
 
     // 시뮬레이션 실행
     const result = runSimulation(inputs, strategy);
