@@ -55,6 +55,17 @@ export interface SimulationResult {
     };
 
     successProbability: number;  // 목표 달성 확률 (%)
+
+    gapAnalysis: GapAnalysisResult;
+}
+
+export interface GapAnalysisResult {
+    targetIncome: number;
+    projectedIncome: number;
+    gap: number;
+    gapPercentage: number;
+    isShortfall: boolean;
+    additionalMonthlyContribution: number;
 }
 
 export interface ScenarioDetail {

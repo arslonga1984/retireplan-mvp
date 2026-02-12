@@ -70,41 +70,7 @@ export default function Dashboard() {
             {inputs.targetRetirementIncome && inputs.targetRetirementIncome > 0 && (
                 <div className="w-full">
                     {(() => {
-                        const targetIncome = inputs.targetRetirementIncome;
-                        const projectedIncome = median.monthlyPayout;
-                        const gap = targetIncome - projectedIncome;
-                        const isShortfall = gap > 0;
-                        const gapPercentage = Math.abs(gap / targetIncome) * 100;
-
-                        // Shortfall Logic
-                        // additionalMonthlyContribution needed?
-                        // Simple approximation: (Gap / Projected) * CurrentContribution is roughly proportional?
-                        // Better: Reverse calculate FV.
-                        // FV_needed = Gap * 12 / (WithdrawalRate) ?? 
-                        // More accurate additional contribution calc:
-                        // FV_shortfall = Gap * (IsPerpetual ? (12/Rate) : (12 * PayoutYears)) -- Very rough
-                        // Let's use simple proportionality to Total Accumulated Capital
-                        // Current Capital -> Monthly Payout
-                        // Needed Capital = (Target / Payout) * Current Capital
-                        // Shortfall Capital = Needed - Current
-                        // Additional Monthly = Shortfall Capital / (( (1+r)^n - 1 ) / r) ...
-
-                        // Simplified Proportional Approach:
-                        // Current Inputs result in 'median.finalAssets'.
-                        // We need 'targetAssets' = finalAssets * (TargetIncome / ProjectedIncome).
-                        // Diff = targetAssets - finalAssets.
-                        // This Diff must be covered by PMT.
-                        // PMT = Diff * r / ((1+r)^n - 1)
-
-                        const r = strategy.expectedReturn / 100 / 12;
-                        const n = result.yearsToRetirement * 12;
-                        const targetAssets = median.finalAssets * (targetIncome / projectedIncome);
-                        const assetShortfall = targetAssets - median.finalAssets;
-
-                        let additionalMonthly = 0;
-                        if (isShortfall && r > 0 && n > 0) {
-                            additionalMonthly = assetShortfall * r / (Math.pow(1 + r, n) - 1);
-                        }
+                        const { targetIncome, projectedIncome, gap, gapPercentage, isShortfall, additionalMonthlyContribution } = result.gapAnalysis;
 
                         return (
                             <Card className={`border-l-4 ${isShortfall ? 'border-l-destructive' : 'border-l-green-500'} mb-6`}>
@@ -130,7 +96,7 @@ export default function Dashboard() {
                                                 {isShortfall ? '부족 금액' : '여유 금액'}
                                             </p>
                                             <p className="text-xl font-bold">
-                                                {formatCurrency(Math.abs(gap))} ({gapPercentage.toFixed(1)}%)
+                                                {gap > 0 ? '+' : ''}{formatCurrency(gap)} ({gap > 0 ? '+' : ''}{gapPercentage.toFixed(1)}%)
                                             </p>
                                         </div>
                                     </div>
@@ -139,7 +105,7 @@ export default function Dashboard() {
                                         <div className="mt-4 p-3 bg-destructive/10 rounded-md text-sm">
                                             <p className="font-semibold text-destructive mb-1">솔루션 제안</p>
                                             <p>
-                                                목표를 달성하려면 매월 약 <span className="font-bold text-lg">{formatCurrency(additionalMonthly)}</span>을 더 저축해야 합니다.
+                                                목표를 달성하려면 매월 약 <span className="font-bold text-lg">{formatCurrency(additionalMonthlyContribution)}</span>을 더 저축해야 합니다.
                                                 <br />
                                                 또는 은퇴 시기를 늦추거나, 목표 수익률을 높이는 방법을 고려해보세요.
                                             </p>

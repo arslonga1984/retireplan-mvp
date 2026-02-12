@@ -1,4 +1,4 @@
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
 import type { SimulationResult } from '@/types';
 
 export default function AssetGrowthChart({ data }: { data: SimulationResult }) {
@@ -40,6 +40,7 @@ export default function AssetGrowthChart({ data }: { data: SimulationResult }) {
                         labelFormatter={(label) => `${label}세`}
                     />
                     <Legend />
+                    <ReferenceLine x={data.scenarios.median.yearlyData[data.yearsToRetirement]?.age} stroke="red" strokeDasharray="3 3" label={{ value: "은퇴", position: "insideTopRight", fill: "red", fontSize: 12 }} />
                     <Area type="monotone" dataKey="best" stroke="#10b981" fillOpacity={1} fill="url(#colorBest)" name="최선" />
                     <Area type="monotone" dataKey="median" stroke="#3b82f6" fillOpacity={1} fill="url(#colorMedian)" name="평균" />
                     <Area type="monotone" dataKey="worst" stroke="#ef4444" fillOpacity={1} fill="url(#colorWorst)" name="최악" />
