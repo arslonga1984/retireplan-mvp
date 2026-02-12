@@ -22,13 +22,13 @@ const TICKERS = {
     US_TOTAL_BOND: { ticker: '441610', name: 'KODEX 미국종합채권SRI액티브(H)' },
     US_LONG_TREASURY: { ticker: '453850', name: 'ACE 미국30년국채액티브(H)' },
     US_INTER_TREASURY: { ticker: '305080', name: 'TIGER 미국채10년선물' },
-    US_SHORT_TREASURY: { ticker: '462330', name: 'KODEX 미국채울트라30년선물(H)' }, // Placeholder for short term, actually SHY equivalent in KR is rare, usually KOFR or CD.
+    US_SHORT_TREASURY: { ticker: '462330', name: 'KODEX 미국채울트라30년선물(H)' },
     // Better Short Term US Proxy in Korea -> SOFR
     US_SOFR: { ticker: '449170', name: 'TIGER 미국달러SOFR금리액티브(합성)' },
 
     KR_3Y_BOND: { ticker: '114260', name: 'KODEX 국고채3년' },
-    KR_10Y_BOND: { ticker: '365340', name: 'KBSTAR KIS국고채30년Enhanced' }, // Using long term for better barbell
-    KR_TOTAL_BOND: { ticker: '465640', name: 'KODEX 국고채10년액티브' }, // Proxy
+    KR_10Y_BOND: { ticker: '365340', name: 'KBSTAR KIS국고채30년Enhanced' },
+    KR_TOTAL_BOND: { ticker: '465640', name: 'KODEX 국고채10년액티브' },
 
     // Others
     GOLD: { ticker: '411060', name: 'ACE KRX금현물' },
