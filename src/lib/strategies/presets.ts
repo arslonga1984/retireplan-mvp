@@ -1,7 +1,7 @@
 import type { PortfolioStrategy } from '@/types';
 
 // Korean ETF Ticker Constants (for easier management)
-const TICKERS = {
+export const TICKERS = {
     // US Equities
     US_SP500: { ticker: '360750', name: 'TIGER 미국S&P500' },
     US_NASDAQ100: { ticker: '367380', name: 'ACE 미국나스닥100' },
