@@ -85,8 +85,10 @@ export default function Step4Payout() {
                             onCheckedChange={setInflationAdjusted}
                         />
                         <Label htmlFor="inflation" className="flex-1 cursor-pointer">
-                            물가상승률 반영 (준비중)
-                            <span className="block text-xs text-muted-foreground">매년 2% 물가 상승을 가정하여 수령액 조정 (현재 MVP 미적용)</span>
+                            물가상승률 반영 (연 2%)
+                            <span className="block text-xs text-muted-foreground">
+                                매년 2% 물가 상승을 반영하여, <strong>현재 가치(구매력) 기준</strong>으로 결과를 보여줍니다.
+                            </span>
                         </Label>
                     </div>
 

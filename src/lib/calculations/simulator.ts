@@ -7,11 +7,16 @@ import type { UserInputs, PortfolioStrategy, SimulationResult, ScenarioDetail, Y
 export function runSimulation(inputs: UserInputs, strategy: PortfolioStrategy): SimulationResult {
     const yearsToRetirement = inputs.retirementAge - inputs.currentAge;
 
+    // 실질 수익률 반영 (물가상승률 2% 가정)
+    // inflationAdjusted가 true이면, 기대 수익률에서 2%를 차감하여 실질 구매력 기준 시뮬레이션
+    const inflationRate = inputs.inflationAdjusted ? 2.0 : 0;
+    const realExpectedReturn = strategy.expectedReturn - inflationRate;
+
     // 시나리오별 수익률 (단순화)
     const scenarios = {
-        worst: strategy.expectedReturn - 2,   // -2%p
-        median: strategy.expectedReturn,
-        best: strategy.expectedReturn + 2,    // +2%p
+        worst: realExpectedReturn - 2,   // -2%p
+        median: realExpectedReturn,
+        best: realExpectedReturn + 2,    // +2%p
     };
 
     const results = {
