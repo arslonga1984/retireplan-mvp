@@ -66,6 +66,103 @@ export default function Dashboard() {
 
             <AdPlaceholder slot="dashboard_top" />
 
+            {/* Gap Analysis Card */}
+            {inputs.targetRetirementIncome && inputs.targetRetirementIncome > 0 && (
+                <div className="w-full">
+                    {(() => {
+                        const targetIncome = inputs.targetRetirementIncome;
+                        const projectedIncome = median.monthlyPayout;
+                        const gap = targetIncome - projectedIncome;
+                        const isShortfall = gap > 0;
+                        const gapPercentage = Math.abs(gap / targetIncome) * 100;
+
+                        // Shortfall Logic
+                        // additionalMonthlyContribution needed?
+                        // Simple approximation: (Gap / Projected) * CurrentContribution is roughly proportional?
+                        // Better: Reverse calculate FV.
+                        // FV_needed = Gap * 12 / (WithdrawalRate) ?? 
+                        // More accurate additional contribution calc:
+                        // FV_shortfall = Gap * (IsPerpetual ? (12/Rate) : (12 * PayoutYears)) -- Very rough
+                        // Let's use simple proportionality to Total Accumulated Capital
+                        // Current Capital -> Monthly Payout
+                        // Needed Capital = (Target / Payout) * Current Capital
+                        // Shortfall Capital = Needed - Current
+                        // Additional Monthly = Shortfall Capital / (( (1+r)^n - 1 ) / r) ...
+
+                        // Simplified Proportional Approach:
+                        // Current Inputs result in 'median.finalAssets'.
+                        // We need 'targetAssets' = finalAssets * (TargetIncome / ProjectedIncome).
+                        // Diff = targetAssets - finalAssets.
+                        // This Diff must be covered by PMT.
+                        // PMT = Diff * r / ((1+r)^n - 1)
+
+                        const r = strategy.expectedReturn / 100 / 12;
+                        const n = result.yearsToRetirement * 12;
+                        const targetAssets = median.finalAssets * (targetIncome / projectedIncome);
+                        const assetShortfall = targetAssets - median.finalAssets;
+
+                        let additionalMonthly = 0;
+                        if (isShortfall && r > 0 && n > 0) {
+                            additionalMonthly = assetShortfall * r / (Math.pow(1 + r, n) - 1);
+                        }
+
+                        return (
+                            <Card className={`border-l-4 ${isShortfall ? 'border-l-destructive' : 'border-l-green-500'} mb-6`}>
+                                <CardHeader>
+                                    <CardTitle className="text-lg">
+                                        {isShortfall ? '🚨 은퇴 자금 부족 알림' : '🎉 은퇴 준비 충분'}
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex flex-col md:flex-row justify-between gap-4">
+                                        <div>
+                                            <p className="text-muted-foreground mb-1">희망 월 생활비</p>
+                                            <p className="text-xl font-bold">{formatCurrency(targetIncome)}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground mb-1">예상 월 수령액</p>
+                                            <p className={`text-xl font-bold ${isShortfall ? 'text-destructive' : 'text-green-600'}`}>
+                                                {formatCurrency(projectedIncome)}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-muted-foreground mb-1">
+                                                {isShortfall ? '부족 금액' : '여유 금액'}
+                                            </p>
+                                            <p className="text-xl font-bold">
+                                                {formatCurrency(Math.abs(gap))} ({gapPercentage.toFixed(1)}%)
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {isShortfall && (
+                                        <div className="mt-4 p-3 bg-destructive/10 rounded-md text-sm">
+                                            <p className="font-semibold text-destructive mb-1">솔루션 제안</p>
+                                            <p>
+                                                목표를 달성하려면 매월 약 <span className="font-bold text-lg">{formatCurrency(additionalMonthly)}</span>을 더 저축해야 합니다.
+                                                <br />
+                                                또는 은퇴 시기를 늦추거나, 목표 수익률을 높이는 방법을 고려해보세요.
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {!isShortfall && (
+                                        <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/20 rounded-md text-sm">
+                                            <p className="font-semibold text-green-700 dark:text-green-400 mb-1">Great Job!</p>
+                                            <p>
+                                                목표 생활비 대비 약 <span className="font-bold">{gapPercentage.toFixed(1)}%</span>의 여유가 있습니다.
+                                                <br />
+                                                더 풍요로운 은퇴 생활을 즐기거나, 조기 은퇴를 고려해볼 수 있습니다.
+                                            </p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        );
+                    })()}
+                </div>
+            )}
+
             {/* 요약 카드 그리드 */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="col-span-1">

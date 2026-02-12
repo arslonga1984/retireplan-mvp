@@ -13,8 +13,9 @@ import MetaHead from '@/components/SEO/MetaHead';
 const schema = z.object({
     currentAge: z.number().min(25, "25세 이상이어야 합니다").max(65, "65세 이하여야 합니다"),
     retirementAge: z.number().min(55, "55세 이상이어야 합니다").max(70, "70세 이하여야 합니다"),
-    currentAssets: z.number().min(0, "0원 이상이어야 합니다").max(1000000000, "10억원 이하여야 합니다"),
-    monthlyContribution: z.number().min(0, "0원 이상이어야 합니다").max(5000000, "500만원 이하여야 합니다"),
+    currentAssets: z.number().min(0, "0원 이상이어야 합니다"),
+    monthlyContribution: z.number().min(0, "0원 이상이어야 합니다"),
+    targetRetirementIncome: z.number().min(0, "0원 이상이어야 합니다"),
 }).refine(data => data.retirementAge > data.currentAge, {
     message: "연금 개시 연령은 현재 나이보다 커야 합니다",
     path: ["retirementAge"],
@@ -33,6 +34,7 @@ export default function Step1BasicInfo() {
             retirementAge: inputs.retirementAge,
             currentAssets: inputs.currentAssets,
             monthlyContribution: inputs.monthlyContribution,
+            targetRetirementIncome: inputs.targetRetirementIncome || 3000000,
         },
     });
 
@@ -138,6 +140,34 @@ export default function Step1BasicInfo() {
                             </div>
                             {form.formState.errors.monthlyContribution && (
                                 <p className="text-sm text-destructive">{form.formState.errors.monthlyContribution.message}</p>
+                            )}
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="targetRetirementIncome">희망 은퇴 월 생활비 (현재 가치)</Label>
+                            <div className="relative">
+                                <Controller
+                                    control={form.control}
+                                    name="targetRetirementIncome"
+                                    render={({ field: { onChange, value, ...rest } }) => (
+                                        <Input
+                                            {...rest}
+                                            type="text"
+                                            placeholder="3,000,000"
+                                            value={value ? new Intl.NumberFormat('ko-KR').format(value) : ''}
+                                            onChange={(e) => {
+                                                const numericValue = Number(e.target.value.replace(/[^0-9]/g, ''));
+                                                onChange(numericValue);
+                                            }}
+                                            className="text-right pr-8"
+                                        />
+                                    )}
+                                />
+                                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">원</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground">현재 물가 기준으로 은퇴 후 필요한 월 생활비를 입력하세요.</p>
+                            {form.formState.errors.targetRetirementIncome && (
+                                <p className="text-sm text-destructive">{form.formState.errors.targetRetirementIncome.message}</p>
                             )}
                         </div>
 

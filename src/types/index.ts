@@ -4,6 +4,7 @@ export interface UserInputs {
     retirementAge: number;
     currentAssets: number;
     monthlyContribution: number;
+    targetRetirementIncome: number; // 희망 은퇴 월 생활비
 
     // Step 2: 투자 목표
     targetReturn: number;        // 연 복리 수익률 (%)

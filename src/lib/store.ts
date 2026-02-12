@@ -12,6 +12,7 @@ const defaultInputs: UserInputs = {
     retirementAge: 60,
     currentAssets: 0,
     monthlyContribution: 1000000,
+    targetRetirementIncome: 3000000,
     targetReturn: 7,
     maxDrawdown: 25,
     strategyId: '',
