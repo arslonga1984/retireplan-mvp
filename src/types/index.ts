@@ -16,7 +16,14 @@ export interface UserInputs {
     // Step 4: 연금 수령
     payoutType: 'perpetual' | 'fixed';
     payoutYears?: number;
+
     inflationAdjusted: boolean;
+
+    // Step 4: 은퇴 후 전략 (NEW)
+    postRetirementStrategyId?: string;
+
+    // 국민연금
+    nationalPensionAmount?: number;
 }
 
 export interface PortfolioStrategy {
@@ -66,6 +73,8 @@ export interface GapAnalysisResult {
     gapPercentage: number;
     isShortfall: boolean;
     additionalMonthlyContribution: number;
+    nationalPensionAmount: number;
+    totalRetirementIncome: number;
 }
 
 export interface ScenarioDetail {

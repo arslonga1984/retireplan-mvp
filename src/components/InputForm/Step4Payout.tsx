@@ -9,6 +9,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import ProgressBar from '@/components/Layout/ProgressBar';
 import MetaHead from '@/components/SEO/MetaHead';
+import { STRATEGIES } from '@/lib/strategies/presets';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 
 export default function Step4Payout() {
     const navigate = useNavigate();
@@ -17,18 +20,21 @@ export default function Step4Payout() {
     const [payoutType, setPayoutType] = useState<'perpetual' | 'fixed'>(inputs.payoutType);
     const [payoutYears, setPayoutYears] = useState<number>(inputs.payoutYears || 20);
     const [inflationAdjusted, setInflationAdjusted] = useState<boolean>(inputs.inflationAdjusted);
+    const [postRetirementStrategyId, setPostRetirementStrategyId] = useState<string>(inputs.postRetirementStrategyId || inputs.strategyId || 'permanent');
+
 
     const onSubmit = () => {
         setInputs({
             payoutType,
             payoutYears: payoutType === 'fixed' ? payoutYears : undefined,
-            inflationAdjusted
+            inflationAdjusted,
+            postRetirementStrategyId
         });
         navigate('/result');
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 page-enter">
             <MetaHead title="연금 수령 계획 - RetirePlan" />
             <ProgressBar currentStep={4} totalSteps={4} />
             <Card>
@@ -77,6 +83,39 @@ export default function Step4Payout() {
                             <p className="text-xs text-muted-foreground">5년 ~ 50년 사이 설정 가능</p>
                         </div>
                     )}
+
+                    <div className="space-y-3 pt-4 border-t">
+                        <Label>은퇴 후 운용 전략</Label>
+                        <p className="text-xs text-muted-foreground mb-2">
+                            은퇴 이후에는 자산을 어떻게 운용하시겠습니까? (보통 안정성을 높이는 것이 좋습니다)
+                        </p>
+                        <Select
+                            value={postRetirementStrategyId}
+                            onValueChange={setPostRetirementStrategyId}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="전략 선택" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {STRATEGIES.map(strategy => (
+                                    <SelectItem key={strategy.id} value={strategy.id}>
+                                        <div className="flex flex-col items-start py-1">
+                                            <span className="font-medium">{strategy.nameKo}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                기대수익 {strategy.expectedReturn}% / MDD -{strategy.expectedMDD}%
+                                            </span>
+                                        </div>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
+                        {/* Strategy Details Preview */}
+                        <div className="bg-muted p-3 rounded text-sm text-muted-foreground border">
+                            {STRATEGIES.find(s => s.id === postRetirementStrategyId)?.description}
+                        </div>
+                    </div>
+
 
                     <div className="flex items-center space-x-2 border p-4 rounded-md bg-muted/20">
                         <Switch

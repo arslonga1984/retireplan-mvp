@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import ProgressBar from '@/components/Layout/ProgressBar';
 import MetaHead from '@/components/SEO/MetaHead';
+import SliderZoneGuide from './SliderZoneGuide';
 
 const schema = z.object({
     targetReturn: z.number().min(3, "최소 3% 이상이어야 합니다").max(15, "최대 15% 이하여야 합니다"),
@@ -36,7 +37,7 @@ export default function Step2Goals() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 page-enter">
             <MetaHead title="투자 목표 설정 - RetirePlan" />
             <ProgressBar currentStep={2} totalSteps={4} />
             <Card>
@@ -57,10 +58,11 @@ export default function Step2Goals() {
                                 value={[form.watch('targetReturn')]}
                                 onValueChange={(value) => form.setValue('targetReturn', value[0])}
                             />
+                            <SliderZoneGuide type="return" currentValue={form.watch('targetReturn')} />
                             <Input
                                 id="targetReturn"
                                 type="number"
-                                className="hidden" // Hidden input for form submission if needed, or just rely on react-hook-form state
+                                className="hidden"
                                 {...form.register('targetReturn', { valueAsNumber: true })}
                             />
                             {form.formState.errors.targetReturn && (
@@ -83,6 +85,7 @@ export default function Step2Goals() {
                                 value={[form.watch('maxDrawdown')]}
                                 onValueChange={(value) => form.setValue('maxDrawdown', value[0])}
                             />
+                            <SliderZoneGuide type="mdd" currentValue={form.watch('maxDrawdown')} />
                             <Input
                                 id="maxDrawdown"
                                 type="number"
