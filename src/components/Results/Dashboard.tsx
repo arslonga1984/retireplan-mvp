@@ -87,6 +87,29 @@ export default function Dashboard() {
 
             <AdPlaceholder slot="dashboard_top" />
 
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base">시뮬레이션 가정</CardTitle>
+                </CardHeader>
+                <CardContent className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
+                    <div className="bg-muted rounded p-2">인플레이션
+                        <p className="font-semibold text-sm">{result.assumptions.inflationRate}%</p>
+                    </div>
+                    <div className="bg-muted rounded p-2">은퇴 전 실질수익률
+                        <p className="font-semibold text-sm">{result.assumptions.realExpectedReturnPre}%</p>
+                    </div>
+                    <div className="bg-muted rounded p-2">은퇴 후 실질수익률
+                        <p className="font-semibold text-sm">{result.assumptions.realExpectedReturnPost}%</p>
+                    </div>
+                    <div className="bg-muted rounded p-2">추정 변동성
+                        <p className="font-semibold text-sm">{result.assumptions.estimatedVolatility}%</p>
+                    </div>
+                    <div className="bg-muted rounded p-2">확률 시뮬레이션
+                        <p className="font-semibold text-sm">{result.assumptions.simulationRuns.toLocaleString()}회</p>
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Gap Analysis Card */}
             {inputs.targetRetirementIncome && inputs.targetRetirementIncome > 0 && (
                 <div className="w-full">
@@ -235,7 +258,7 @@ export default function Dashboard() {
                         <div className={`text-lg font-bold ${result.successProbability >= 70 ? 'text-green-600' : result.successProbability >= 40 ? 'text-yellow-600' : 'text-destructive'}`}>
                             {result.successProbability}%
                         </div>
-                        <p className="text-xs text-muted-foreground">목표 달성 확률</p>
+                        <p className="text-xs text-muted-foreground">목표 달성 확률 (Monte Carlo)</p>
                     </CardContent>
                 </Card>
 
@@ -296,7 +319,7 @@ export default function Dashboard() {
                     <Card>
                         <CardHeader>
                             <CardTitle>연금 수령 시뮬레이션</CardTitle>
-                            <p className="text-sm text-muted-foreground">은퇴 후 매월 받을 수 있는 금액과 잔여 자산 추이입니다.</p>
+                            <p className="text-sm text-muted-foreground">명목 월수령액(물가 반영)과 현재가치 월수령액, 잔여 자산 추이를 함께 보여줍니다.</p>
                         </CardHeader>
                         <CardContent>
                             <PayoutChart
