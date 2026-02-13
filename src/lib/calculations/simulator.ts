@@ -1,25 +1,20 @@
 import type { UserInputs, PortfolioStrategy, SimulationResult, ScenarioDetail, YearlyData, GapAnalysisResult } from '@/types';
 import { STRATEGIES } from '@/lib/strategies/presets';
 
-
 /**
- * 단순 복리 계산 기반 시뮬레이션
- * MVP에서는 Monte Carlo 없이 결정론적 계산만 수행
+ * 복리 계산 + 확률 시뮬레이션 기반 은퇴 분석
  */
 export function runSimulation(inputs: UserInputs, strategy: PortfolioStrategy): SimulationResult {
     const yearsToRetirement = inputs.retirementAge - inputs.currentAge;
-
-    // 실질 수익률 반영 (물가상승률 2% 가정)
     const inflationRate = inputs.inflationAdjusted ? 2.0 : 0;
     const realExpectedReturn = strategy.expectedReturn - inflationRate;
 
-    // 은퇴 후 수익률 결정
-    const postRetirementStrategyId = inputs.postRetirementStrategyId;
-    const postRetirementStrategy = postRetirementStrategyId
-        ? STRATEGIES.find(s => s.id === postRetirementStrategyId)
+    const postRetirementStrategy = inputs.postRetirementStrategyId
+        ? STRATEGIES.find(s => s.id === inputs.postRetirementStrategyId)
         : strategy;
 
     const postRealReturn = (postRetirementStrategy?.expectedReturn || strategy.expectedReturn) - inflationRate;
+    const estimatedVolatility = estimatePortfolioVolatility(strategy);
 
     const scenarios = {
         worst: { pre: realExpectedReturn - 2, post: postRealReturn - 2 },
@@ -33,11 +28,29 @@ export function runSimulation(inputs: UserInputs, strategy: PortfolioStrategy): 
         best: calculateScenario(inputs, scenarios.best.pre, scenarios.best.post, yearsToRetirement),
     };
 
-    const results: SimulationResult = {
+    const simulationRuns = 500;
+    const monteCarloSuccessProbability = runMonteCarloSuccessProbability(
+        inputs,
+        realExpectedReturn,
+        postRealReturn,
+        estimatedVolatility,
+        yearsToRetirement,
+        simulationRuns
+    );
+
+    return {
         yearsToRetirement,
         totalContributions: calculateTotalContributions(inputs, yearsToRetirement),
         scenarios: scenarioResults,
-        successProbability: estimateSuccessProbability(scenarioResults, inputs.retirementAge),
+        successProbability: monteCarloSuccessProbability || estimateSuccessProbability(scenarioResults),
+        monteCarloSuccessProbability,
+        assumptions: {
+            inflationRate,
+            realExpectedReturnPre: round1(realExpectedReturn),
+            realExpectedReturnPost: round1(postRealReturn),
+            estimatedVolatility: round1(estimatedVolatility),
+            simulationRuns,
+        },
         gapAnalysis: calculateGapAnalysis(
             inputs,
             scenarioResults.median.monthlyPayout,
@@ -47,40 +60,125 @@ export function runSimulation(inputs: UserInputs, strategy: PortfolioStrategy): 
             yearsToRetirement
         )
     };
-
-    return results;
 }
 
-/**
- * 시나리오별 85세/100세 자산잔여 여부 기반 성공확률 추정
- */
 function estimateSuccessProbability(
-    scenarios: { worst: ScenarioDetail; median: ScenarioDetail; best: ScenarioDetail },
-    _retirementAge: number
+    scenarios: { worst: ScenarioDetail; median: ScenarioDetail; best: ScenarioDetail }
 ): number {
     const checkAges = [85, 100];
     let score = 0;
-    const totalChecks = checkAges.length * 3; // 3 scenarios x 2 ages = 6
+    const totalChecks = checkAges.length * 3;
 
     for (const scenario of [scenarios.worst, scenarios.median, scenarios.best]) {
         for (const targetAge of checkAges) {
             const dataPoint = scenario.yearlyData.find(d => d.age === targetAge);
-            if (dataPoint && dataPoint.assets > 0) {
-                score++;
-            }
+            if (dataPoint && dataPoint.assets > 0) score++;
         }
     }
 
-    // worst 85세 통과 → +10 보너스, worst 100세 통과 → +5 보너스
     const worst85 = scenarios.worst.yearlyData.find(d => d.age === 85);
     const worst100 = scenarios.worst.yearlyData.find(d => d.age === 100);
     let bonus = 0;
     if (worst85 && worst85.assets > 0) bonus += 10;
     if (worst100 && worst100.assets > 0) bonus += 5;
 
-    // 기본 점수: (통과한 체크 / 전체 체크) * 80 + bonus, 최대 99
     const baseRate = (score / totalChecks) * 80 + bonus;
     return Math.min(99, Math.max(10, Math.round(baseRate)));
+}
+
+function round1(value: number): number {
+    return Math.round(value * 10) / 10;
+}
+
+function estimatePortfolioVolatility(strategy: PortfolioStrategy): number {
+    const volByAsset: Record<string, number> = {
+        stocks: 18,
+        bonds: 7,
+        gold: 15,
+        reits: 20,
+        cash: 1,
+    };
+
+    const corr: Record<string, Record<string, number>> = {
+        stocks: { stocks: 1, bonds: 0.2, gold: 0.1, reits: 0.65, cash: 0 },
+        bonds: { stocks: 0.2, bonds: 1, gold: 0.15, reits: 0.2, cash: 0.3 },
+        gold: { stocks: 0.1, bonds: 0.15, gold: 1, reits: 0.05, cash: 0 },
+        reits: { stocks: 0.65, bonds: 0.2, gold: 0.05, reits: 1, cash: 0.1 },
+        cash: { stocks: 0, bonds: 0.3, gold: 0, reits: 0.1, cash: 1 },
+    };
+
+    const allocationEntries = Object.entries(strategy.allocation)
+        .filter(([, weight]) => (weight || 0) > 0)
+        .map(([asset, weight]) => ({ asset, weight: (weight || 0) / 100 }));
+
+    let variance = 0;
+
+    for (const i of allocationEntries) {
+        for (const j of allocationEntries) {
+            const volI = volByAsset[i.asset] || 10;
+            const volJ = volByAsset[j.asset] || 10;
+            const c = corr[i.asset]?.[j.asset] ?? (i.asset === j.asset ? 1 : 0.2);
+            variance += i.weight * j.weight * volI * volJ * c;
+        }
+    }
+
+    return Math.sqrt(Math.max(variance, 0));
+}
+
+function runMonteCarloSuccessProbability(
+    inputs: UserInputs,
+    annualReturnPre: number,
+    annualReturnPost: number,
+    annualVolatility: number,
+    yearsToRetirement: number,
+    runs: number
+): number {
+    const inflationMultiplier = inputs.inflationAdjusted ? 1.02 : 1;
+    const horizonYears = 100 - inputs.retirementAge;
+    let successCount = 0;
+
+    for (let run = 0; run < runs; run++) {
+        let assets = inputs.currentAssets;
+
+        for (let y = 0; y < yearsToRetirement; y++) {
+            const sampledAnnualReturn = sampleNormal(annualReturnPre, annualVolatility);
+            const monthlyRate = sampledAnnualReturn / 100 / 12;
+            for (let m = 0; m < 12; m++) {
+                assets = assets * (1 + monthlyRate) + inputs.monthlyContribution;
+            }
+        }
+
+        let survived = true;
+
+        for (let y = 0; y < horizonYears; y++) {
+            const sampledAnnualReturn = sampleNormal(annualReturnPost, Math.max(annualVolatility * 0.8, 3));
+            const monthlyRate = sampledAnnualReturn / 100 / 12;
+            const withdrawalNominal = inputs.targetRetirementIncome > 0
+                ? inputs.targetRetirementIncome * Math.pow(inflationMultiplier, y)
+                : calculateMonthlyPayout(assets, inputs.payoutType, sampledAnnualReturn, inputs.payoutYears);
+
+            for (let m = 0; m < 12; m++) {
+                assets = assets * (1 + monthlyRate) - withdrawalNominal;
+                if (assets <= 0) {
+                    survived = false;
+                    break;
+                }
+            }
+
+            if (!survived) break;
+        }
+
+        if (survived) successCount++;
+    }
+
+    return Math.round((successCount / runs) * 100);
+}
+
+function sampleNormal(mean: number, stdDev: number): number {
+    const u1 = Math.random();
+    const u2 = Math.random();
+    const z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    return mean + z * stdDev;
 }
 
 function calculateTotalContributions(inputs: UserInputs, years: number): number {
@@ -99,7 +197,6 @@ function calculateScenario(
     let currentAssets = inputs.currentAssets;
     const yearlyData: YearlyData[] = [];
 
-    // 연도별 자산 계산
     for (let year = 1; year <= years; year++) {
         const startAssets = currentAssets;
 
@@ -118,10 +215,8 @@ function calculateScenario(
         });
     }
 
-    // 은퇴 후 인출 단계 (Decumulation Phase)
     const finalAge = 100;
     const postRetirementYears = finalAge - inputs.retirementAge;
-
     const finalAssets = currentAssets;
 
     const projectedPayout = calculateMonthlyPayout(
@@ -131,7 +226,7 @@ function calculateScenario(
         inputs.payoutYears
     );
 
-    const monthlyWithdrawal = (inputs.targetRetirementIncome && inputs.targetRetirementIncome > 0)
+    const monthlyWithdrawalBase = (inputs.targetRetirementIncome && inputs.targetRetirementIncome > 0)
         ? inputs.targetRetirementIncome
         : projectedPayout;
 
@@ -139,10 +234,12 @@ function calculateScenario(
 
     for (let year = 1; year <= postRetirementYears; year++) {
         const currentAge = inputs.retirementAge + year;
+        const inflationFactor = inputs.inflationAdjusted ? Math.pow(1.02, year - 1) : 1;
+        const monthlyWithdrawalNominal = monthlyWithdrawalBase * inflationFactor;
 
         for (let month = 1; month <= 12; month++) {
             retirementAssets = retirementAssets * (1 + monthlyRatePost);
-            retirementAssets -= monthlyWithdrawal;
+            retirementAssets -= monthlyWithdrawalNominal;
         }
 
         if (retirementAssets < 0) retirementAssets = 0;
@@ -152,7 +249,9 @@ function calculateScenario(
             age: currentAge,
             contribution: 0,
             assets: Math.round(retirementAssets),
-            returnAmount: 0
+            returnAmount: 0,
+            withdrawalNominal: Math.round(monthlyWithdrawalNominal),
+            withdrawalReal: Math.round(monthlyWithdrawalNominal / inflationFactor)
         });
     }
 
@@ -185,16 +284,16 @@ function calculateMonthlyPayout(
 ): number {
     if (type === 'perpetual') {
         return assets * 0.04 / 12;
-    } else {
-        const r = annualReturnRate / 100 / 12;
-        const n = (years || 20) * 12;
-
-        if (r === 0) {
-            return assets / n;
-        }
-
-        return (assets * r) / (1 - Math.pow(1 + r, -n));
     }
+
+    const r = annualReturnRate / 100 / 12;
+    const n = (years || 20) * 12;
+
+    if (r === 0) {
+        return assets / n;
+    }
+
+    return (assets * r) / (1 - Math.pow(1 + r, -n));
 }
 
 function calculateGapAnalysis(
@@ -208,8 +307,6 @@ function calculateGapAnalysis(
     const targetIncome = inputs.targetRetirementIncome;
     const nationalPensionAmount = inputs.nationalPensionAmount || 0;
     const totalRetirementIncome = projectedIncome + nationalPensionAmount;
-
-    // Gap은 총 은퇴소득(개인투자 + 국민연금) 기준으로 계산
     const gap = totalRetirementIncome - targetIncome;
     const gapPercentage = targetIncome > 0 ? (gap / targetIncome) * 100 : 0;
     const isShortfall = gap < 0;
@@ -217,10 +314,8 @@ function calculateGapAnalysis(
     let additionalMonthlyContribution = 0;
 
     if (isShortfall) {
-        // 국민연금을 감안한 부족 소득
         const incomeShortfall = targetIncome - totalRetirementIncome;
 
-        // 부족 소득분에 대한 필요 자산
         let requiredAdditionalAssets = 0;
         if (inputs.payoutType === 'perpetual') {
             requiredAdditionalAssets = (incomeShortfall * 12) / 0.04;

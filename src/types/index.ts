@@ -62,8 +62,18 @@ export interface SimulationResult {
     };
 
     successProbability: number;  // 목표 달성 확률 (%)
+    monteCarloSuccessProbability?: number;
+    assumptions: SimulationAssumptions;
 
     gapAnalysis: GapAnalysisResult;
+}
+
+export interface SimulationAssumptions {
+    inflationRate: number;
+    realExpectedReturnPre: number;
+    realExpectedReturnPost: number;
+    estimatedVolatility: number;
+    simulationRuns: number;
 }
 
 export interface GapAnalysisResult {
@@ -92,4 +102,6 @@ export interface YearlyData {
     contribution: number;
     assets: number;
     returnAmount: number;
+    withdrawalNominal?: number;
+    withdrawalReal?: number;
 }
