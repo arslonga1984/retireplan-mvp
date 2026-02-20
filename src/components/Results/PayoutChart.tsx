@@ -1,5 +1,6 @@
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import type { ScenarioDetail } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 
 interface Props {
     scenario: ScenarioDetail;
@@ -22,11 +23,7 @@ export default function PayoutChart({ scenario, retirementAge, payoutType, payou
     const depletionPoint = chartData.find(d => d.remainingAssets <= 0);
     const depletionAge = depletionPoint?.age;
 
-    const formatCurrency = (value: number) => {
-        if (value >= 100000000) return `${(value / 100000000).toFixed(1)}억`;
-        if (value >= 10000) return `${(value / 10000).toFixed(0)}만`;
-        return String(value);
-    };
+
 
     return (
         <div className="w-full">
@@ -51,12 +48,21 @@ export default function PayoutChart({ scenario, retirementAge, payoutType, payou
                                     monthlyPayoutReal: '월 수령액(현재가치)',
                                     remainingAssets: '잔여 자산'
                                 };
-                                return [`${new Intl.NumberFormat('ko-KR').format(Number(value ?? 0))}원`, labels[name as string] || name];
+                                return [formatCurrency(Number(value ?? 0)), labels[name as string] || String(name)];
                             }}
                             labelFormatter={(label) => `${label}세`}
                         />
                         <Legend />
-                        {depletionAge && <ReferenceLine x={depletionAge} yAxisId="left" stroke="#ef4444" strokeDasharray="3 3" label={{ value: '자산 고갈', position: 'insideTopRight', fill: '#ef4444', fontSize: 11 }} />}
+                        {depletionAge && (
+                            <ReferenceLine
+                                x={depletionAge}
+                                yAxisId="left"
+                                stroke="#dc2626"
+                                strokeDasharray="3 3"
+                                strokeWidth={2.5}
+                                label={{ value: '자산 고갈', position: 'top', fill: '#dc2626', fontSize: 13, fontWeight: 700 }}
+                            />
+                        )}
                         <Bar yAxisId="left" dataKey="monthlyPayoutNominal" fill="#8884d8" radius={[2, 2, 0, 0]} barSize={12} name="monthlyPayoutNominal" />
                         <Line yAxisId="left" type="monotone" dataKey="monthlyPayoutReal" stroke="#6366f1" strokeWidth={2} dot={false} name="monthlyPayoutReal" />
                         <Line yAxisId="right" type="monotone" dataKey="remainingAssets" stroke="#10b981" strokeWidth={2} dot={false} name="remainingAssets" />

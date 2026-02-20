@@ -1,0 +1,17 @@
+{
+  "name": "RetirePlan AI - 퇴직연금 시뮬레이터",
+  "short_name": "RetirePlan",
+  "description": "AI가 추천하는 맞춤 투자 전략으로 은퇴를 준비하세요",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a2533",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

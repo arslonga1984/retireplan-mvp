@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Shield, Target, Clock } from 'lucide-react';
 import MetaHead from '@/components/SEO/MetaHead';
+import AdSense from '@/components/SEO/AdSense';
 
 const FEATURES = [
     {
@@ -57,6 +58,8 @@ export default function LandingPage() {
                 </div>
                 <p className="text-xs text-muted-foreground">회원가입 없이 바로 시작 가능</p>
             </section>
+
+            <AdSense slot="landing_hero_bottom" format="horizontal" />
 
             {/* Features */}
             <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">

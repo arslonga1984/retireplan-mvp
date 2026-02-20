@@ -9,6 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import ProgressBar from '@/components/Layout/ProgressBar';
 import MetaHead from '@/components/SEO/MetaHead';
+import AdSense from '@/components/SEO/AdSense';
 import { STRATEGIES } from '@/lib/strategies/presets';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -21,6 +22,7 @@ export default function Step4Payout() {
     const [payoutYears, setPayoutYears] = useState<number>(inputs.payoutYears || 20);
     const [inflationAdjusted, setInflationAdjusted] = useState<boolean>(inputs.inflationAdjusted);
     const [postRetirementStrategyId, setPostRetirementStrategyId] = useState<string>(inputs.postRetirementStrategyId || inputs.strategyId || 'permanent');
+    const [nationalPensionAmount, setNationalPensionAmount] = useState<number>(inputs.nationalPensionAmount || 0);
 
 
     const onSubmit = () => {
@@ -28,7 +30,8 @@ export default function Step4Payout() {
             payoutType,
             payoutYears: payoutType === 'fixed' ? payoutYears : undefined,
             inflationAdjusted,
-            postRetirementStrategyId
+            postRetirementStrategyId,
+            nationalPensionAmount
         });
         navigate('/result');
     };
@@ -117,6 +120,32 @@ export default function Step4Payout() {
                     </div>
 
 
+                    <div className="space-y-2 pt-4 border-t">
+                        <Label htmlFor="nationalPension">예상 월 국민연금 수령액 (선택)</Label>
+                        <Input
+                            id="nationalPension"
+                            type="number"
+                            value={nationalPensionAmount}
+                            onChange={(e) => {
+                                const val = Number(e.target.value);
+                                if (!isNaN(val) && val >= 0 && val <= 5000000) {
+                                    setNationalPensionAmount(Math.floor(val));
+                                }
+                            }}
+                            placeholder="0"
+                            min={0}
+                            max={5000000}
+                        />
+                        <p className="text-xs text-muted-foreground">
+                            만 65세부터 수령한다고 가정합니다. (현재 가치 기준)
+                            <br />
+                            <a href="https://csa.nps.or.kr/finance/csa/csa.do" target="_blank" rel="noreferrer" className="underline text-primary">
+                                국민연금 예상 수령액 조회하기
+                            </a>
+                        </p>
+                    </div>
+
+
                     <div className="flex items-center space-x-2 border p-4 rounded-md bg-muted/20">
                         <Switch
                             id="inflation"
@@ -139,6 +168,7 @@ export default function Step4Payout() {
                     </div>
                 </CardContent>
             </Card>
+            <AdSense slot="step4_bottom" format="horizontal" />
         </div>
     );
 }

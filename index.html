@@ -1,22 +1,32 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RetirePlan - Retirement Simulation</title>
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6322612652869494"
-    crossorigin="anonymous"></script>
-  <!-- Google Analytics (GA4) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9WNGNCC71P"></script>
+  <meta name="google-adsense-account" content="ca-pub-XXXXXXXXXX" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#1a2533" />
+  <title>RetirePlan AI - 퇴직연금 시뮬레이터</title>
+
+  <!-- Google Analytics (GA4) - production only -->
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-9WNGNCC71P');
+    if (location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://www.googletagmanager.com/gtag/js?id=G-9WNGNCC71P';
+      document.head.appendChild(s);
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-9WNGNCC71P', { send_page_view: false });
+    }
   </script>
+
+  <!-- Google AdSense (승인 후 ca-pub-XXXXXXXXXX를 실제 ID로 교체) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXX"
+    crossorigin="anonymous"></script>
 </head>
 
 <body>

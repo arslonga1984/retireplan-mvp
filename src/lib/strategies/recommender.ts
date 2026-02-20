@@ -54,9 +54,9 @@ function generateDynamicStrategy(targetReturn: number): PortfolioStrategy | null
         expectedReturn: Number(expReturn.toFixed(1)),
         expectedMDD: Number(expMDD.toFixed(0)),
         etfList: [
-            { ...TICKERS.US_NASDAQ100, assetClass: 'stocks' as 'stocks', weight: w_nasdaq },
-            { ...TICKERS.US_SP500, assetClass: 'stocks' as 'stocks', weight: w_sp500 },
-            { ...TICKERS.US_TOTAL_BOND, assetClass: 'bonds' as 'bonds', weight: w_bond },
+            { ...TICKERS.US_NASDAQ100, assetClass: 'stocks' as const, weight: w_nasdaq },
+            { ...TICKERS.US_SP500, assetClass: 'stocks' as const, weight: w_sp500 },
+            { ...TICKERS.US_TOTAL_BOND, assetClass: 'bonds' as const, weight: w_bond },
         ].filter(e => e.weight > 0)
     };
 }
@@ -65,7 +65,7 @@ export function getRecommendedStrategy(targetReturn: number, maxDrawdown: number
     // 0. Dynamic Strategy Check
     const dynamicStrategy = generateDynamicStrategy(targetReturn);
 
-    let candidates = STRATEGIES.map(strategy => {
+    const candidates = STRATEGIES.map(strategy => {
         // 1. MDD Filter: Exclude if strategy MDD is significantly higher than user tolerance (+5% buffer)
         if (strategy.expectedMDD > maxDrawdown + 5) {
             return { strategy, distance: 9999, reason: 'Risk too high' };

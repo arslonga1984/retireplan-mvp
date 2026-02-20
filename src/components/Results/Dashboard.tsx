@@ -11,9 +11,10 @@ import AssetGrowthChart from './AssetGrowthChart';
 import PortfolioPieChart from './PortfolioPieChart';
 import PayoutChart from './PayoutChart';
 import WhatIfPanel from './WhatIfPanel';
+import GapAnalysisCard from './GapAnalysisCard';
 import { TrendingUp, CircleDollarSign, CalendarClock, Target, Loader2 } from 'lucide-react';
 import MetaHead from '@/components/SEO/MetaHead';
-import AdPlaceholder from '@/components/SEO/AdPlaceholder';
+import AdSense from '@/components/SEO/AdSense';
 import { formatCurrency, formatCompactNumber } from '@/lib/utils';
 import { useCountUp } from '@/lib/hooks/useCountUp';
 
@@ -85,7 +86,7 @@ export default function Dashboard() {
                 <Button variant="outline" size="sm" className="text-xs" onClick={() => navigate('/step4')}>수령계획 수정</Button>
             </div>
 
-            <AdPlaceholder slot="dashboard_top" />
+            <AdSense slot="dashboard_top" format="horizontal" />
 
             <Card>
                 <CardHeader>
@@ -112,99 +113,7 @@ export default function Dashboard() {
 
             {/* Gap Analysis Card */}
             {inputs.targetRetirementIncome && inputs.targetRetirementIncome > 0 && (
-                <div className="w-full">
-                    {(() => {
-                        const { targetIncome, projectedIncome, gap, gapPercentage, isShortfall, additionalMonthlyContribution, nationalPensionAmount, totalRetirementIncome } = result.gapAnalysis;
-
-                        return (
-                            <Card className={`border-l-4 ${isShortfall ? 'border-l-destructive' : 'border-l-green-500'} mb-6`}>
-                                <CardHeader>
-                                    <CardTitle className="text-lg">
-                                        {isShortfall ? '은퇴 자금 부족 알림' : '은퇴 준비 충분'}
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="flex flex-col md:flex-row justify-between gap-4">
-                                        <div>
-                                            <p className="text-muted-foreground mb-1">희망 월 생활비</p>
-                                            <p className="text-xl font-bold">{formatCurrency(targetIncome)}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground mb-1">예상 월 수령액</p>
-                                            <p className={`text-xl font-bold ${isShortfall ? 'text-destructive' : 'text-green-600'}`}>
-                                                {formatCurrency(projectedIncome)}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-muted-foreground mb-1">
-                                                {isShortfall ? '부족 금액' : '여유 금액'}
-                                            </p>
-                                            <p className="text-xl font-bold">
-                                                {gap > 0 ? '+' : ''}{formatCurrency(gap)} ({gap > 0 ? '+' : ''}{gapPercentage.toFixed(1)}%)
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {nationalPensionAmount > 0 && (
-                                        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm border border-blue-200 dark:border-blue-800">
-                                            <p className="font-semibold text-blue-700 dark:text-blue-400 mb-1">국민연금 포함 분석</p>
-                                            <div className="grid grid-cols-3 gap-2 text-center">
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">개인 투자</p>
-                                                    <p className="font-bold">{formatCurrency(projectedIncome)}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">국민연금</p>
-                                                    <p className="font-bold text-blue-600">+{formatCurrency(nationalPensionAmount)}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">총 은퇴소득</p>
-                                                    <p className="font-bold text-primary">{formatCurrency(totalRetirementIncome)}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {isShortfall && (
-                                        <div className="mt-4 p-3 bg-destructive/10 rounded-md text-sm">
-                                            <p className="font-semibold text-destructive mb-2">솔루션 제안</p>
-                                            <ul className="space-y-1.5">
-                                                <li>
-                                                    매월 약 <span className="font-bold text-lg">{formatCurrency(additionalMonthlyContribution)}</span>을 더 저축
-                                                    <Button variant="link" size="sm" className="text-xs h-auto p-0 ml-1" onClick={() => navigate('/step1')}>
-                                                        → 불입액 수정
-                                                    </Button>
-                                                </li>
-                                                <li>
-                                                    은퇴 시기를 늦추기
-                                                    <Button variant="link" size="sm" className="text-xs h-auto p-0 ml-1" onClick={() => navigate('/step1')}>
-                                                        → 은퇴 연령 수정
-                                                    </Button>
-                                                </li>
-                                                <li>
-                                                    목표 수익률 높이기
-                                                    <Button variant="link" size="sm" className="text-xs h-auto p-0 ml-1" onClick={() => navigate('/step2')}>
-                                                        → 목표 수정
-                                                    </Button>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    )}
-
-                                    {!isShortfall && (
-                                        <div className="mt-4 p-3 bg-green-100 dark:bg-green-900/20 rounded-md text-sm">
-                                            <p className="font-semibold text-green-700 dark:text-green-400 mb-1">Great Job!</p>
-                                            <p>
-                                                목표 생활비 대비 약 <span className="font-bold">{gapPercentage.toFixed(1)}%</span>의 여유가 있습니다.
-                                                더 풍요로운 은퇴 생활을 즐기거나, 조기 은퇴를 고려해볼 수 있습니다.
-                                            </p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        );
-                    })()}
-                </div>
+                <GapAnalysisCard gapAnalysis={result.gapAnalysis} />
             )}
 
             {/* 요약 카드 그리드 - Row 1 */}
@@ -254,11 +163,26 @@ export default function Dashboard() {
                         <CardTitle className="text-sm font-medium">성공 확률</CardTitle>
                         <Target className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
-                    <CardContent>
-                        <div className={`text-lg font-bold ${result.successProbability >= 70 ? 'text-green-600' : result.successProbability >= 40 ? 'text-yellow-600' : 'text-destructive'}`}>
-                            {result.successProbability}%
+                    <CardContent className="flex flex-col items-center justify-center pt-2 pb-6">
+                        <div className="relative flex items-center justify-center w-32 h-16 overflow-hidden">
+                            {/* Gauge SVG */}
+                            <svg viewBox="0 0 100 50" className="w-full h-full">
+                                <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e2e8f0" strokeWidth="10" />
+                                <path
+                                    d="M 10 50 A 40 40 0 0 1 90 50"
+                                    fill="none"
+                                    stroke={result.successProbability >= 70 ? '#16a34a' : result.successProbability >= 40 ? '#ca8a04' : '#dc2626'}
+                                    strokeWidth="10"
+                                    strokeDasharray="126"
+                                    strokeDashoffset={126 - (126 * result.successProbability) / 100}
+                                    className="transition-all duration-1000 ease-out"
+                                />
+                            </svg>
+                            <div className="absolute top-8 text-xl font-bold">
+                                {result.successProbability}%
+                            </div>
                         </div>
-                        <p className="text-xs text-muted-foreground">목표 달성 확률 (Monte Carlo)</p>
+                        <p className="text-xs text-muted-foreground mt-1">목표 달성 확률 (Monte Carlo)</p>
                     </CardContent>
                 </Card>
 
@@ -333,10 +257,12 @@ export default function Dashboard() {
                 </TabsContent>
             </Tabs>
 
+            <AdSense slot="dashboard_mid" format="rectangle" />
+
             {/* What-if 민감도 분석 */}
             <WhatIfPanel inputs={inputs} strategy={strategy} baseResult={result} />
 
-            <AdPlaceholder slot="dashboard_bottom" />
+            <AdSense slot="dashboard_bottom" format="horizontal" />
         </div>
     );
 }
